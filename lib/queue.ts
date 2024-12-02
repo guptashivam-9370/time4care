@@ -48,7 +48,11 @@ export const notificationWorker = new Worker(
   }
 );
 notificationWorker.on("failed", (job, err) => {
-  console.error(`Job ${job.id} failed with error:`, err);
+  if (job) {
+    console.error(`Job ${job.id} failed with error:`, err);
+  } else {
+    console.error(`Job failed with error:`, err);
+  }
 });
 
 // Event listener for completed jobs

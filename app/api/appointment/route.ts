@@ -4,6 +4,10 @@ import jwt from "jsonwebtoken";
 import { notificationQueue } from "../../../lib/queue";
 // import { z } from "zod";
 const prisma = new PrismaClient();
+interface decodedToken {
+  id: string;
+  role: string;
+}
 export async function POST(req: NextRequest) {
   try {
     const { date, time, doctorId } = await req.json();
@@ -23,10 +27,10 @@ export async function POST(req: NextRequest) {
       );
     }
     const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-    const patientId = (decoded as any).id;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as decodedToken;
+    const patientId = decoded.id;
     //check the role is patient
-    const role = (decoded as any).role;
+    const role = decoded.role;
     if (role !== "patient") {
       return NextResponse.json(
         { error: "Unauthorized:only patient can book appointment" },
@@ -139,10 +143,15 @@ export async function POST(req: NextRequest) {
       { message: "Appointment created successfully", appointment: appointment },
       { status: 201 }
     );
-  } catch (error: any) {
-    console.log(error.message);
+  } catch (error: unknown) {
+    let errorMessage = "Unknown error";
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
     return NextResponse.json(
-      { error: "Appointment booking error:", erroris: error.message },
+      { error: "Appointment booking error:", erroris: errorMessage },
       { status: 500 }
     );
   }

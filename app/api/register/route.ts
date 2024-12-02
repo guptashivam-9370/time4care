@@ -78,11 +78,18 @@ export async function POST(req: Request) {
     } else {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
-  } catch (error: any) {
-    // console.log(error);
-    console.log(error.message);
+  } catch (error: unknown) {
+    let errorMessage = "Unknown error";
+
+    if (error instanceof Error) {
+      console.error(error.message);
+      errorMessage = error.message;
+    } else {
+      console.error(error);
+    }
+
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Error in listing appointments", details: errorMessage },
       { status: 500 }
     );
   }

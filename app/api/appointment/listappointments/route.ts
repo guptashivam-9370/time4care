@@ -44,10 +44,18 @@ export async function GET(req: NextRequest) {
       status: 200,
       body: appointments,
     });
-  } catch (error: any) {
-    console.error(error.message);
+  } catch (error: unknown) {
+    let errorMessage = "Unknown error";
+
+    if (error instanceof Error) {
+      console.error(error.message);
+      errorMessage = error.message;
+    } else {
+      console.error(error);
+    }
+
     return NextResponse.json(
-      { error: "Error in listing appointments" },
+      { error: "Error in listing appointments", details: errorMessage },
       { status: 500 }
     );
   }
