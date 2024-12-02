@@ -23,7 +23,6 @@
 
 ### Prerequisites
 
-- Node.js (>= 14.x)
 - PostgreSQL
 - Redis
 
