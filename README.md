@@ -1,36 +1,226 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Time4Care(Notification-Based Appointment Reminder System)
 
-## Getting Started
+## Tech Stack
 
-First, run the development server:
+- Next.js
+- TypeScript
+- PostgreSQL
+- Redis
+- BullMQ
+- Nodemailer
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Features
+
+1. User Management
+   - User Registration
+   - User Authentication
+2. Appointment Scheduling
+   - Patients can book an appointment with a doctor
+3. Notification System
+   - Automatically send an email to patients a few hours before their scheduled appointment
+
+## Setup Instructions
+
+### Prerequisites
+
+- Node.js (>= 14.x)
+- PostgreSQL
+- Redis
+
+### Environment Variables
+
+Create a `.env` file in the root directory and add the following environment variables:
+
+```env
+DATABASE_URL=your-database-url
+JWT_SECRET=your-jwt-secret
+REDIS_URL=redis://localhost:6379
+EMAIL_HOST=smtp.your-email-provider.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@example.com
+EMAIL_PASS=your-email-password
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```bash
+   git clone https://github.com/guptashivam9370/time4care.git
+   cd your-repo
+   ```
 
-## Learn More
+2. Install dependencies:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   npm install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Set up the database:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npx prisma migrate dev --name init
+   ```
 
-## Deploy on Vercel
+4. Start the development server:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   ```bash
+   npm run dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. Start Redis server:
+   ```bash
+   redis-server
+   ```
+
+## API Documentation
+
+### User Registration
+
+#### Endpoint
+
+`POST /api/register`
+
+#### Request Body
+
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "role": "doctor",
+  "doctorId": "1234ABC",
+  "phone": "1234567890",
+  "designation": "Cardiologist"
+}
+```
+
+#### Response
+
+```json
+{
+  "message": "Doctor registered successfully",
+  "token": "jwt-token"
+}
+```
+
+### User Authentication
+
+#### Endpoint
+
+`POST /api/login`
+
+#### Request Body
+
+```json
+{
+  "email": "john@example.com",
+  "password": "password123",
+  "role": "doctor"
+}
+```
+
+#### Response
+
+```json
+{
+  "message": "Login successful",
+  "token": "jwt-token"
+}
+```
+
+### Book Appointment
+
+#### Endpoint
+
+`POST /api/appointments`
+
+- the appointment will be booked with the doctor of specified doctorId
+- doctor with doctorId should present in database
+
+#### Request Body
+
+```json
+{
+  "date": "2024-12-03",
+  "time": "12:20",
+  "doctorId": 1
+}
+```
+
+#### Response
+
+```json
+{
+  "message":"Appointment created successfully"
+  "appointment":{
+        "id": 1,
+        "date": "2024-12-03T12:20:00.000Z",
+        "doctorId": 1,
+        "patientId": "some-patient-id",
+        "status": "CONFIRMED",
+        "createdAt":"some date",
+        "doctor":{
+            ...
+        }
+        "patient":{
+            ...
+        }
+  }
+}
+```
+
+### List Down appointments
+
+`/api/appointment/listappointments`
+
+- patient or doctor should be authenticated
+- all the appointments of the logged in person will be displayed
+
+#### Response
+
+```json
+{
+    "status":200,
+    "body":{
+        [{appointments}]
+    }
+}
+```
+
+### Error Handling
+
+#### Invalid Appointment Data
+
+```json
+{
+  "error": "Invalid time format. Use HH:MM"
+}
+```
+
+#### Unauthorized Access
+
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+#### User Not Found
+
+```json
+{
+  "error": "User not found"
+}
+```
+
+## Notification System
+
+### Description
+
+The notification system uses BullMQ to handle sending email notifications asynchronously. Nodemailer is used for delivering emails.
+
+### Setup
+
+- Ensure Redis server is running.
+- The worker processes jobs from the queue and sends email notifications.
