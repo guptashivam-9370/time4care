@@ -23,14 +23,17 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-
-    const existingDoctor = await prisma.doctor.findUnique({ where: { email } });
+    const existingDoctor = await prisma.doctor.findFirst({
+      where: {
+        OR: [{ email }, { doctorId }],
+      },
+    });
     const existingPatient = await prisma.patient.findUnique({
       where: { email },
     });
     if (existingPatient || existingDoctor) {
       return NextResponse.json(
-        { error: "User already exists" },
+        { error: "User already exists with same email or id" },
         { status: 400 }
       );
     }
