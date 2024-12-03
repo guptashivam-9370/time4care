@@ -79,6 +79,7 @@ EMAIL_PASS=your-email-password
 #### Endpoint
 
 `POST /api/register`
+role should be eithered `doctor` or `patient`
 
 #### Request Body
 
@@ -94,11 +95,28 @@ EMAIL_PASS=your-email-password
 }
 ```
 
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "role": "patient",
+  "phone": "1234567890"
+}
+```
+
 #### Response
 
 ```json
 {
   "message": "Doctor registered successfully",
+  "token": "jwt-token"
+}
+```
+
+```json
+{
+  "message": "Patient registered successfully",
   "token": "jwt-token"
 }
 ```
@@ -114,8 +132,7 @@ EMAIL_PASS=your-email-password
 ```json
 {
   "email": "john@example.com",
-  "password": "password123",
-  "role": "doctor"
+  "password": "password123"
 }
 ```
 
@@ -136,6 +153,7 @@ EMAIL_PASS=your-email-password
 
 - the appointment will be booked with the doctor of specified doctorId
 - doctor with doctorId should present in database
+- only patient can book the appointment
 
 #### Request Body
 
